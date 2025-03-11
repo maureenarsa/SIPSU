@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIPERKIM-SIPSU</title>
+    <link href="img/logo-kota-yogyakarta.png" rel="icon">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.15.4/css/all.css" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="lib/animate/animate.min.css" rel="stylesheet">
+    <link href="lib/owlcarousel/assets/owl.carousel.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet-control-search/dist/leaflet-search.min.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css" />
+
+    <style>
+        .container.main-content {
+            margin-bottom: 50px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        #map {
+            height: 500px;
+            width: 100%;
+            border-radius: 8px;
+        }
+
+        .flex-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
+        }
+
+        .tab-btn {
+            flex: 1;
+            background-color: #f8f9fa;
+            color: #262626;
+            border: none;
+            padding: 15px;
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease-in-out;
+            border-radius: 10px 10px 0 0;
+        }
+
+        .tab-btn.clicked {
+            background-color: #085ccc;
+            color: white;
+            border-color: aqua;
+        }
+
+        .search-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 15px;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .search-button {
+            padding: 10px 15px;
+            margin-left: 5px;
+            background-color: #085ccc;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .search-button:hover {
+            background-color: #085ccc;
+        }
+
+        /* Styling untuk tabel */
+        .table thead th {
+            background-color: #085ccc;
+            color: white;
+            font-weight: 600;
+        }
+
+        .table tbody tr td {
+            color: #262626;
+
+        }
+
+        /* Styling untuk daftar */
+        .accordion-body ul li {
+            color: #262626;
+        }
+
+        /* Styling untuk tombol */
+        .accordion-button {
+            color: #262626;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container-fluid nav-bar px-0 px-lg-4 py-lg-0">
+        <div class="container">
+            <nav class="navbar navbar-expand-lg navbar-light">
+                <a href="#" class="navbar-brand p-0 d-flex align-items-center">
+                    <img src="img/perkim-logo.png" alt="SIPERKIM Logo" class="img-fluid"
+                        style="max-height: 80px; width: auto;">
+                </a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                    <span class="fa fa-bars"></span>
+                </button>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container main-content py-1">
+        <div class="bg-white shadow-lg rounded-2xl p-4">
+            <h4 class="text-center" style="font-family: 'Poppins', sans-serif; font-size: 25px; font-weight: 600;">
+                SELAMAT DATANG DI SIPERKIM KOTA YOGYAKARTA</h4>
+            <p class="mb-4 text-center" style="font-family: 'Poppins', sans-serif; font-size: 16px; font-weight: 400;">
+                Jelajahi informasi lengkap tentang perumahan dan permukiman yang telah diserahkan ke Pemerintah Kota
+                Yogyakarta!</p>
+
+            <div class="flex-container">
+                <button id="petaBtn"
+                    class="tab-btn px-4 py-2 rounded-md transition-colors duration-300 bg-gray-200 text-gray-700 border border-gray-300"
+                    onclick="showTab('peta', this)">Peta</button>
+                <button id="dataBtn"
+                    class="tab-btn px-4 py-2 rounded-md transition-colors duration-300 bg-gray-200 text-gray-700 border border-gray-300"
+                    onclick="showTab('data', this)">Data Perumahan</button>
+                <button id="syaratBtn"
+                    class="tab-btn px-4 py-2 rounded-md transition-colors duration-300 bg-gray-200 text-gray-700 border border-gray-300"
+                    onclick="showTab('faq', this)">Syarat Pengajuan</button>
+                <button id="alurBtn"
+                    class="tab-btn px-4 py-2 rounded-md transition-colors duration-300 bg-gray-200 text-gray-700 border border-gray-300"
+                    onclick="showTab('alur', this)">Alur Penyerahan</button>
+            </div>
+
+            <!-- FAQs Start -->
+            <div id="faq" class="tab-content hidden">
+                <div class="accordion" id="accordionExample">
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button border-0" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                Kelengkapan Dokumen Permohonan Penyerahan PSU oleh Developer/Pengembang
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show active"
+                            aria-labelledby="headingOne" data-bs-parent="#accordionExample">
+                            <div class="accordion-body rounded">
+                                <ul>
+                                    <li>Fotokopi KTP Permohonan</li>
+                                    <li>Fotokopi Akta Pendirian Perusahaan</li>
+                                    <li>Fotokopi Sertifikat Tanah/Dokumen Kepemilikan Tanah Lainnya/Sertifikat Persil
+                                        Terdekat</li>
+                                    <li>Denah Lokasi Perumahan</li>
+                                    <li>Siteplan/Rekomendasi Sejenis</li>
+                                    <li>PBG atau Perizinan Sejenis</li>
+                                    <li>Salinan SLF</li>
+                                    <li>Surat Pelepasan Hak atas Tanah</li>
+                                    <li>Daftar Aset</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="accordion-item">
+                        <h2 class="accordion-header" id="headingTwo">
+                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Kelengkapan Dokumen Permohonan Serah Terima PSU oleh Warga
+                            </button>
+                        </h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" aria-labelledby="headingTwo"
+                            data-bs-parent="#accordionExample">
+                            <div class="accordion-body">
+                                <ul>
+                                    <li>Surat Permohonan</li>
+                                    <li>Daftar dan Spesifikasi Aset</li>
+                                    <li>Denah Lokasi Perumahan</li>
+                                    <li>Berita Acara Kesepakatan Penyerahan PSU oleh Warga</li>
+                                    <li>Surat Kuasa Penunjukan Perwakilan Warga untuk Proses Administrasi Serah Terima
+                                        PSU</li>
+                                    <li>Siteplan</li>
+                                    <li>Sertifikat Persil Terdekat</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- FAQs End -->
+
+            <div id="peta" class="tab-content">
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-box" placeholder="Cari perumahan...">
+                    <button class="search-button" onclick="searchLocation()">Cari</button>
+                </div>
+                <div id="map-container" class="relative w-full h-96 rounded-lg overflow-hidden border border-gray-300">
+                    <div id="map" class="absolute inset-0"></div>
+                </div>
+            </div>
+
+            <!-- Data perumahan -->
+            <div id="data" class="tab-content hidden">
+                <div class="container">
+                    <!-- <h2>Daftar Data Perumahan</h2> -->
+                    <table class="display table table-bordered table-striped w-full">
+                        <thead>
+                            <tr class="bg-gray-200 text-center">
+                                <th class="p-2">Nama Perumahan</th>
+                                <th class="p-2">Lokasi</th>
+                                <th class="p-2">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataPerumahanBody">
+                            <!-- Data dari GeoJSON akan ditambahkan di sini -->
+                        </tbody>
+                    </table>
+                    <div class="pagination text-center mt-4">
+                        <button id="prevPage" class="btn btn-primary">Sebelumnya</button>
+                        <span id="pageRange" class="mx-2">1-10</span>
+                        <button id="nextPage" class="btn btn-primary">Selanjutnya</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="alur" class="tab-content hidden">
+                <img src="img/PENGEMBANG.png" class="img-fluid w-100 rounded-4 shadow-lg" alt="SIPERKIM">
+                <hr>
+                <img src="img/PSU_Warga.png" class="img-fluid w-100 rounded-4 shadow-lg" alt="SIPERKIM">
+            </div>
+
+            <div id="faq" class="tab-content hidden">
+                <div class="accordion" id="accordionExample">
+                    <!-- Accordion items -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabId, clickedButton) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.getElementById(tabId).classList.remove('hidden');
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('clicked'));
+            clickedButton.classList.add('clicked');
+            if (tabId === 'peta') {
+                setTimeout(() => {
+                    window.map.invalidateSize();
+                }, 300);
+            }
+        }
+
+        var markerData = [
+            { category: "Kemantren: Gondokusuman", coordinates: [[-7.789194, 110.396008, "Griya Timoho Estate<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Gondokusuman", coordinates: [[-7.788796, 110.396436, "Puri Timoho Asri 1<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Gondokusuman", coordinates: [[-7.789941, 110.396799, "Puri Timoho Baru<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Gondokusuman", coordinates: [[-7.791645, 110.395463, "Timoho Asri 4<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Gondokusuman", coordinates: [[-7.777287, 110.372642, "Terban Sari<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Jetis", coordinates: [[-7.777092, 110.370637, "Jetis Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Kotagede", coordinates: [[-7.818379, 110.396785, "Asana Mutiara 2<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Kotagede", coordinates: [[-7.821772, 110.395693, "Sendok Indah<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Kotagede", coordinates: [[-7.819504, 110.400437, "Balekambang<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Kotagede", coordinates: [[-7.810186, 110.399594, "Gedong Kuning Permai<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Kotagede", coordinates: [[-7.809208, 110.400166, "Gedongkuning Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Kotagede", coordinates: [[-7.813279, 110.400337, "Pilahan Permai<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Kotagede", coordinates: [[-7.815844, 110.397939, "Puri Hegar<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Kotagede", coordinates: [[-7.81133, 110.399577, "Taman Pilahan Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.825464, 110.351935, "Kuta Kuna<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.825621, 110.355823, "Keldongkiron Permai<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.823083, 110.35297, "Puri Dukuh Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.811617, 110.354742, "Taman Suryowijayan<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.815883, 110.365489, "Awana Town<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.819918, 110.356975, "Alam Suryo Pratama<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.822457, 110.358738, "Griya Mandiri 2<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.822742, 110.356044, "Griya Minggiran<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.821111, 110.357209, "Griya Suryadiningratan<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.825155, 110.357296, "Griya Suryo Asri 1<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.820413, 110.357099, "Griya Suryo Asri 2<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.816043, 110.35958, "Nakhiil Residence<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.821501, 110.358157, "Suryo Garden<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mantrijeron", coordinates: [[-7.821272, 110.358235, "Suryo Village<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mergangsari", coordinates: [[-7.8242, 110.374802, "Bumi Madani Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mergangsari", coordinates: [[-7.822489, 110.374846, "Green House<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mergangsari", coordinates: [[-7.821327, 110.373847, "Griya Indraloka<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mergangsari", coordinates: [[-7.819661, 110.375118, "Griya Karanganyar Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mergangsari", coordinates: [[-7.808357, 110.375779, "Cluster Triastana Tamansiswa<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Mergangsari", coordinates: [[-7.808102, 110.374692, "Taman Siswa Indah<br>Status: Serah Terima Sementara"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.777837, 110.354538, "Bejokarto Permai<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.781806, 110.356005, "Bumi Intan Regency<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.777765, 110.35223, "Kuantan Regency 2<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.778832, 110.354259, "Pesona Bener Regency<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.771734, 110.366892, "Blunyah Indah Residence<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.769619, 110.364705, "Griya Intan Permai<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.773319, 110.366581, "Griya Petinggen<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.772213, 110.35511, "Citra Garden<br>Status: Serah Terima Sementara"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.772035, 110.355791, "Griya Tiara Amarta<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.77063, 110.354404, "Jambon Asri Residence<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.770997, 110.355503, "Jambon Indah Residence 1<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.769118, 110.355749, "Jambon Permai<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.775967, 110.355123, "Jatimulyo Baru<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.770848, 110.355966, "Jatimulyo indah<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.771574, 110.359947, "Mulya Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.767229, 110.353568, "Pesona Alam Hijau 2<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.769879, 110.356715, "Pondok Intan Permai 1<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.768402, 110.353984, "Pondok Intan Permai 3<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.770262, 110.354777, "Taman Acacia<br>Status: Serah Terima Sementara"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.776287, 110.359764, "Taman Mulia<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.771453, 110.355226, "The Jambon Residence<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.771404, 110.356776, "Villa Century<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.77081, 110.356783, "Villa Jambon<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.787574, 110.35399, "Cokro Regency<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.789244, 110.351621, "Gradara Pratama Residence<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.784148, 110.350729, "Pesona Kuantan Tegalrejo<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Tegalrejo", coordinates: [[-7.787316, 110.35427, "Tjokro Heritage<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.831259, 110.39117, "Agatama Regency<br>Status: Serah Terima Sementara"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.836017, 110.38819, "Alam Asri Giwangan<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.826313, 110.388435, "DM Village Giwangan<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.831661, 110.392032, "Giwang Pratama Estate<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.828063, 110.39099, "Giwangan Kencana Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.839732, 110.38911, "Giwangan Village<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.82773, 110.390795, "Kuantan Townhouse Giwangan<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.835693, 110.388689, "Malangan Indah<br>Status: Belum Pengajuan Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.821231, 110.386872, "Taman Giwangan Asri 1<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.838137, 110.389773, "Taman Giwangan Asri 2<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.796882, 110.390261, "Griya Timoho Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.797966, 110.393371, "Griya Timoho Estate, Mujamuju<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.793602, 110.390282, "Mutiara Timoho<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.796156, 110.394171, "Puri Timoho Permai (APMD)<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.800825, 110.397888, "Riverside<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.797557, 110.391111, "Timoho Asri 1<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.797099, 110.389471, "Timoho Asri 2<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.800459, 110.389735, "Timoho Asri 3<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.798802, 110.394365, "Timoho Asri 5<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.798661, 110.397051, "Timoho Griya Laras<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.796283, 110.390536, "Timoho Mediterania<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.797669, 110.393494, "Timoho Pratama<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.798495, 110.391116, "Timoho Regency<br> Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.798211, 110.394512, "Timoho Residence<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.811883, 110.382721, "Batikan Residence<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.818394, 110.383506, "Berlian Indah<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.81829, 110.384097, "Griya Sidikan Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.817269, 110.38363, "Pesona Residence Nitikan<br>Status: Serah Terima Sementara"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.829485, 110.377579, "Asana Mutiara<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.816886, 110.381839, "Empire Regency<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.827374, 110.378963, "Green Kaira<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.82288, 110.382676, "Griya Nitikan<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.818219, 110.376205, "Kirana Lowanu<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.819861, 110.384581, "Kuantan Regency Sorogenen<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.820604, 110.377231, "Lowanu Avenue<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.820954, 110.376976, "Mutiara Lowanu<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.819773, 110.383198, "Nitikan Jaya Residence<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.820067, 110.383171, "Pondok Permai Nitikan<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.82923, 110.377156, "Puri Kuantan Wirosaban<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.821059, 110.381932, "Purinawa Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.823331, 110.37587, "Sorosutan Indah<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.819928, 110.381215, "Tjokroningrat Residence<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.823983, 110.385099, "Tugu Asri<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.827227, 110.376702, "Wiro Mulyo Indah<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.82589, 110.375666, "Wirosaban Barat<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.827689, 110.378731, "Wirosaban Baru<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.828869, 110.379509, "Wirosaban Indah<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.804536, 110.386081, "Bona Intan Kusumanegara Town House<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.80849, 110.394068, "Perum Veteran Townhouse<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Umbulharjo", coordinates: [[-7.808246, 110.390613, "Taman Lucida<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Wirobrajan", coordinates: [[-7.795423, 110.354648, "Tjokro Riverview<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Wirobrajan", coordinates: [[-7.812745, 110.350461, "De Asmarandana<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Wirobrajan", coordinates: [[-7.806332, 110.351503, "Kuantan Regency Wirobrajan<br>Status: Belum Pengajuan"]] },
+            { category: "Kemantren: Wirobrajan", coordinates: [[-7.802449, 110.350419, "Pesona Ontoseno<br>Status: Belum Pengajuan"]] },
+
+        ];
+
+        function searchLocation() {
+            let query = document.getElementById("searchInput").value.trim().toLowerCase();
+            if (query) {
+                let found = false;
+                markerData.forEach(item => {
+                    item.coordinates.forEach(coord => {
+                        if (coord[2].toLowerCase().includes(query)) {
+                            found = true;
+                            let latlng = [coord[0], coord[1]];
+                            map.setView(latlng, 25);
+                            L.popup()
+                                .setLatLng(latlng)
+                                .setContent(coord[2])
+                                .openOn(map);
+                        }
+                    });
+                });
+                if (!found) {
+                    alert("Lokasi tidak ditemukan!");
+                }
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+            initializeMap();
+            document.querySelectorAll('.tab-content').forEach(el => {
+                if (el.id !== 'peta') {
+                    el.classList.add('hidden');
+                }
+            });
+        });
+
+        function initializeMap() {
+            window.map = L.map('map').setView([-7.771264497436117, 110.35564580279338], 19);
+            window.baseMaps = {
+                "OpenStreetMap": L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map),
+                "Carto Light": L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', { attribution: '© Carto' }),
+                "Esri World Imagery": L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { attribution: '© Esri' })
+            };
+
+            var customIcon = L.icon({
+                iconUrl: 'img/location.png',
+                iconSize: [30, 30],
+                iconAnchor: [15, 15],
+                popUpAnchor: [0, -30]
+            });
+
+            var markers = {};
+            markerData.forEach(item => {
+                if (!markers[item.category]) {
+                    markers[item.category] = L.layerGroup();
+                }
+                item.coordinates.forEach(coord => {
+                    let marker = L.marker([coord[0], coord[1]], { icon: customIcon }).bindPopup(coord[2]);
+                    markers[item.category].addLayer(marker);
+                });
+            });
+
+            fetch('data/perumahan/dataPerumahan.json')
+                .then(response => response.json())
+                .then(data => {
+                    // data.forEach(item => {
+                    //     let marker = L.marker([item.latitude, item.longitude], { icon: customIcon }).bindPopup(item.nama_perumahan + "<br>" + item.lokasi + "<br>" + item.status);
+                    //     markers.addLayer(marker);
+                    // });
+
+                    // Tambahkan data ke tabel
+                    var tbody = document.getElementById('dataPerumahanBody');
+                    data.forEach(item => {
+                        var row = document.createElement('tr');
+                        row.innerHTML = `
+                        <td class="p-2">${item.Nama_Perumahan || '-'}</td>
+                        <td class="p-2">${item.Lokasi || '-'}</td>
+                        <td class="p-2">${item.Status || '-'}</td>
+                    `;
+                        tbody.appendChild(row);
+                    });
+
+                    // Pagination
+                    let currentPage = 1;
+                    const rowsPerPage = 10;
+                    const rows = Array.from(tbody.getElementsByTagName("tr"));
+                    const pageRange = document.getElementById("pageRange");
+                    const searchInput = document.getElementById("searchInput");
+
+                    function displayPage(page, filteredRows = rows) {
+                        tbody.innerHTML = "";
+                        const start = (page - 1) * rowsPerPage;
+                        const end = start + rowsPerPage;
+                        filteredRows.slice(start, end).forEach(row => tbody.appendChild(row));
+                        pageRange.textContent = `${start + 1}-${Math.min(end, filteredRows.length)} dari ${filteredRows.length}`;
+                    }
+
+                    document.getElementById("prevPage").onclick = function () {
+                        if (currentPage > 1) {
+                            currentPage--;
+                            displayPage(currentPage);
+                        }
+                    };
+
+                    document.getElementById("nextPage").onclick = function () {
+                        if (currentPage * rowsPerPage < rows.length) {
+                            currentPage++;
+                            displayPage(currentPage);
+                        }
+                    };
+
+                    searchInput.addEventListener("input", function () {
+                        const searchTerm = searchInput.value.toLowerCase();
+                        const filteredRows = rows.filter(row =>
+                            row.textContent.toLowerCase().includes(searchTerm)
+                        );
+                        currentPage = 1;
+                        displayPage(currentPage, filteredRows);
+                    });
+
+                    displayPage(currentPage);
+                })
+                .catch (error => console.error("Terjadi kesalahan saat memuat JSON:", error));
+
+
+        var layerControl = L.control.layers(window.baseMaps, markers, { collapsed: true }).addTo(map);
+
+        var layerControlDiv = document.querySelector('.leaflet-control-layers-toggle');
+        if (layerControlDiv) {
+            layerControlDiv.style.backgroundImage = "url('img/layer.png')";
+            layerControlDiv.style.backgroundSize = "cover";
+            layerControlDiv.style.width = "30px";
+            layerControlDiv.style.height = "30px";
+            layerControlDiv.style.border = "2px solid rgba(0,0,0,0.2)";
+            layerControlDiv.style.borderRadius = "5px";
+        }
+
+        Object.values(markers).forEach(layer => layer.addTo(map));
+
+        fetch('data/batas/batas-admin-YK.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: function (feature) {
+                        return {
+                            color: "brown",
+                            weight: 3,
+                            fillOpacity: 0.1
+                        };
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error("Terjadi kesalahan saat memuat GeoJSON:", error));
+
+        // Data Perumahan
+        fetch('data/perumahan/Acacia.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: function (feature) {
+                        return {
+                            color: "blue",
+                            weight: 3,
+                            fillOpacity: 0.3
+                        };
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error("Terjadi kesalahan saat memuat GeoJSON:", error));
+
+        fetch('data/perumahan/Agatama.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: function (feature) {
+                        return {
+                            color: "blue",
+                            weight: 3,
+                            fillOpacity: 0.3
+                        };
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error("Terjadi kesalahan saat memuat GeoJSON:", error));
+
+        fetch('data/perumahan/Citra_Garden.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: function (feature) {
+                        return {
+                            color: "blue",
+                            weight: 3,
+                            fillOpacity: 0.3
+                        };
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error("Terjadi kesalahan saat memuat GeoJSON:", error));
+
+        fetch('data/perumahan/Pesona.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: function (feature) {
+                        return {
+                            color: "blue",
+                            weight: 3,
+                            fillOpacity: 0.3
+                        };
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error("Terjadi kesalahan saat memuat GeoJSON:", error));
+
+        fetch('data/perumahan/Taman_Indah.geojson')
+            .then(response => response.json())
+            .then(data => {
+                L.geoJSON(data, {
+                    style: function (feature) {
+                        return {
+                            color: "blue",
+                            weight: 3,
+                            fillOpacity: 0.3
+                        };
+                    }
+                }).addTo(map);
+            })
+            .catch(error => console.error("Terjadi kesalahan saat memuat GeoJSON:", error));
+
+            // fetch('data/TitikSRWebGIS.geojson')
+            //     .then(response => response.json())
+            //     .then(data => {
+            //         L.geoJSON(data, {
+            //             pointToLayer: function (feature, latlng) {
+            //                 var customIcon = L.icon({
+            //                     iconUrl: 'img/location.png', // Pastikan Anda memiliki file location.png di folder img
+            //                     iconSize: [30, 30],
+            //                     iconAnchor: [15, 30],
+            //                     popupAnchor: [0, -30]
+            //                 });
+            //                 return L.marker(latlng, { icon: customIcon });
+            //             },
+            //             onEachFeature: function (feature, layer) {
+            //                 if (feature.properties && feature.properties.Alamat) {
+            //                     layer.bindPopup(feature.properties.Alamat);
+            //                 }
+            //             }
+            //         }).addTo(map);
+            //     })
+            //     .catch(error => console.error("Terjadi kesalahan saat memuat GeoJSON:", error));
+
+        }
+    </script>
+
+    <!-- Footer Start -->
+    <!-- Tambahkan Google Fonts di bagian <head> jika belum ada -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+
+    <div class="container-fluid footer py-0 wow fadeIn" data-wow-delay="0.2s"
+        style="font-family: 'Poppins', sans-serif;" id="kontak">
+        <div class="container py-0">
+            <div class="row g-5 align-items-center">
+                <!-- Kolom LifeSure -->
+                <div class="col-md-3">
+                    <div class="footer-item">
+                        <a href="index.html" class="p-0">
+                            <span class="text-white"><strong>DINAS PEKERJAAN UMUM PERUMAHAN DAN KAWASAN
+                                    PERMUKIMAN</strong></span>
+                        </a>
+                        <div class="footer-btn d-flex">
+                            <a class="btn btn-md-square rounded-circle me-3"
+                                href="https://www.facebook.com/humaskotajogja/posts/dinas-pekerjaan-umum-perumahan-dan-kawasan-permukiman-kota-yogyakarta-bersama-de/1126482980854783/"><i
+                                    class="fab fa-facebook-f"></i></a>
+                            <a class="btn btn-md-square rounded-circle me-3"
+                                href="https://www.youtube.com/@dinaspupkpkotayogyakarta"><i
+                                    class="fab fa-youtube"></i></a>
+                            <a class="btn btn-md-square rounded-circle me-3"
+                                href="https://www.instagram.com/dpupkpkotajogja"><i class="fab fa-instagram"></i></a>
+                            <a class="btn btn-md-square rounded-circle me-0" href="https://pu.jogjakota.go.id"><i
+                                    class="fas fa-link"></i></a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Kolom Kontak (Address, Email, Telepon) -->
+                <div class="col-md-3">
+                    <div class="pt-2">
+                        <div class="row g-3">
+                            <!-- Alamat -->
+                            <div class="col-12 d-flex align-items-center">
+                                <a class="d-flex justify-content-center align-items-center flex-shrink-0 rounded-circle bg-primary text-white me-3"
+                                    href="https://maps.app.goo.gl/t5pJRudAScFXo9Ff7" target="_blank"
+                                    style="width: 45px; height: 45px; min-width: 45px; min-height: 45px;">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                </a>
+                                <a href="https://maps.app.goo.gl/t5pJRudAScFXo9Ff7" target="_blank"
+                                    class="text-white text-decoration-none">
+                                    Jl. Kenari No.56, Muja Muju, Umbulharjo, Yogyakarta, DIY, 55165
+                                </a>
+                            </div>
+                            <!-- Email -->
+                            <div class="col-12 d-flex align-items-center">
+                                <a class="d-flex justify-content-center align-items-center flex-shrink-0 rounded-circle bg-primary text-white me-3"
+                                    href="mailto:puperkim@jogjakota.go.id"
+                                    style="width: 45px; height: 45px; min-width: 45px; min-height: 45px;">
+                                    <i class="fas fa-envelope"></i>
+                                </a>
+                                <a href="mailto:puperkim@jogjakota.go.id" class="text-white text-decoration-none">
+                                    puperkim@jogjakota.go.id
+                                </a>
+                            </div>
+                            <!-- Telepon -->
+                            <div class="col-12 d-flex align-items-center">
+                                <a class="d-flex justify-content-center align-items-center flex-shrink-0 rounded-circle bg-primary text-white me-3"
+                                    href="tel:+62274515867"
+                                    style="width: 45px; height: 45px; min-width: 45px; min-height: 45px;">
+                                    <i class="fa fa-phone-alt"></i>
+                                </a>
+                                <a href="tel:+62274515867" class="text-white text-decoration-none">
+                                    (0274) 515867
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Kolom Google Maps (Lebih Lebar) -->
+                <div class="col-md-6">
+                    <iframe
+                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3952.892296659849!2d110.38845037360183!3d-7.801226077437117!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x2e7a57635e5b33ed%3A0x820f24604a3bca17!2sDinas%20Pekerjaan%20Umum%20Perumahan%20dan%20Kawasan%20Pemukiman%20(%20DPUPKP%20)%20Kota%20Yogyakarta!5e0!3m2!1sid!2sid!4v1739764784527!5m2!1sid!2sid"
+                        width="100%" height="250" style="border:0;" allowfullscreen="" loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"></iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Footer End -->
+
+    <!-- Copyright Start -->
+    <div class="container-fluid copyright py-4">
+        <div class="container">
+            <div class="row g-4 align-items-center">
+                <div class="text-center" style="font-family: 'Poppins', sans-serif;">
+                    <span class="text-body"><a href="#" class="border-bottom text-white"><i
+                                class="fas fa-copyright text-light me-2"></i>2025 Pemerintah Kota
+                            Yogyakarta</a></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Copyright End -->
+    <!-- Footer End -->
+
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="lib/wow/wow.min.js"></script>
+    <script src="lib/easing/easing.min.js"></script>
+    <script src="lib/waypoints/waypoints.min.js"></script>
+    <script src="lib/counterup/counterup.min.js"></script>
+    <script src="lib/lightbox/js/lightbox.min.js"></script>
+    <script src="lib/owlcarousel/owl.carousel.min.js"></script>
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet-control-search/dist/leaflet-search.min.js"></script>
+    <script src="js/main.js"></script>
+</body>
+
+</html>
